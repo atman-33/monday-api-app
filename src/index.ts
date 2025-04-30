@@ -1,10 +1,11 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
 
-// monday.com APIのアクセストークンをここに設定
-const API_TOKEN = 'your_monday_api_token_here';
+dotenv.config();
 
-// monday.com APIのエンドポイント
-const API_URL = 'https://api.monday.com/v2';
+// monday.com APIのアクセストークンとエンドポイントを.envファイルから取得
+const API_TOKEN = process.env.API_TOKEN || '';
+const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 
 // GraphQLクエリでボードのアイテム情報を取得
 const query = `
