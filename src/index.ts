@@ -33,7 +33,6 @@ query {
 }
 `;
 
-// fetchBoardItems関数を定数関数の形式に修正
 const fetchBoardItems = async () => {
   try {
     const response = await axios.post(
@@ -47,18 +46,36 @@ const fetchBoardItems = async () => {
       }
     );
 
-    // 結果をコンソールに出力
-    console.log('取得したデータ:');
-    console.dir(response.data, { depth: null, colors: true });
+    const board = response.data.data.boards[0];
+    console.log(`📋 ボード名: ${board.name}`);
+    console.log('📄 monday Docリンク一覧:\n');
+
+    board.items_page.items.forEach((item: any) => {
+      const docColumn = item.column_values.find((col: any) => col.type === 'doc');
+
+      if (docColumn?.value) {
+        try {
+          const value = JSON.parse(docColumn.value);
+          const files = value.files || [];
+
+          files.forEach((file: any) => {
+            console.log(`✅ アイテム: ${item.name}`);
+            console.log(`   🔗 Doc名: ${file.name}`);
+            console.log(`   🌐 URL: ${file.linkToFile}\n`);
+          });
+        } catch (e) {
+          console.warn(`⚠️ JSONパース失敗: ${item.name}`);
+        }
+      }
+    });
   } catch (error) {
     console.error('データ取得中にエラーが発生:', error);
-    
-    // エラー詳細をログに出力
+
     if (error instanceof Error) {
       console.error('エラー詳細:', error.message);
     }
   }
-}
+};
 
 // 実行
 fetchBoardItems();
