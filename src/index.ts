@@ -7,6 +7,30 @@ dotenv.config();
 const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 
+// 型定義を追加
+type Board = {
+  name: string;
+  columns: Array<{
+    id: string;
+    title: string;
+    type: string;
+  }>;
+  items_page: {
+    items: Item[];
+  };
+};
+
+type Item = {
+  id: string;
+  name: string;
+  column_values: Array<{
+    id: string;
+    type: string;
+    text?: string;
+    value?: string;
+  }>;
+};
+
 // GraphQLクエリでボードのアイテム情報を取得
 const query = `
 query {
@@ -46,12 +70,12 @@ const fetchBoardItems = async () => {
       }
     );
 
-    const board = response.data.data.boards[0];
+    const board: Board = response.data.data.boards[0];
     console.log(`📋 ボード名: ${board.name}`);
     console.log('📄 monday Docリンク一覧:\n');
 
-    board.items_page.items.forEach((item: any) => {
-      const docColumn = item.column_values.find((col: any) => col.type === 'doc');
+    board.items_page.items.forEach((item: Item) => {
+      const docColumn = item.column_values.find((col) => col.type === 'doc');
 
       if (docColumn?.value) {
         try {
