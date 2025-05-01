@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "axios": "^1.9.0",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "puppeteer": "^24.7.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
@@ -9,6 +10,7 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "login": "ts-node src/index.ts --save-cookies",
+    "scrape": "ts-node src/index.ts"
   }
 }
