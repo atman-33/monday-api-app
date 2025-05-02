@@ -100,7 +100,9 @@ const readDocContents = async (docUrls: { itemName: string; docName: string; url
     console.log(`🌐 URL: ${doc.url}`);
 
     try {
+      console.log('🔄 読み込み中...');
       await page.goto(doc.url, { waitUntil: 'networkidle2' });
+      console.log('✅ 読み込み完了。内容を取得中...');
 
       const content = await page.evaluate(() => {
         const container = document.querySelector('[data-testid="doc-container"]') || document.body;
