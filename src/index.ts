@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
+import { launchChrome } from './lib/launch-chrome';
+import { waitForChrome } from './lib/wait-for-chrome';
 
 dotenv.config();
 
@@ -58,7 +60,15 @@ const fetchBoardItems = async (): Promise<Item[]> => {
 };
 
 const saveCookies = async () => {
-  const browser = await puppeteer.launch({ headless: false });
+  // Chromeをデバッグモードで起動
+  launchChrome();
+  // Chromeが起動するまで待機
+  await waitForChrome();
+  // PuppeteerでChromeに接続
+  const browser = await puppeteer.connect({
+    browserURL: 'http://127.0.0.1:9222',
+  });
+
   const page = await browser.newPage();
   await page.goto(MONDAY_LOGIN_URL, { waitUntil: 'networkidle2' });
 
@@ -73,7 +83,10 @@ const saveCookies = async () => {
 };
 
 const readDocContents = async (docUrls: { itemName: string; docName: string; url: string }[]) => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: false,
+  });
+
   const page = await browser.newPage();
 
   // Cookieを読み込んでセット
@@ -93,7 +106,7 @@ const readDocContents = async (docUrls: { itemName: string; docName: string; url
         return (container as HTMLElement).innerText;
       });
 
-      console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`); // 長すぎると困るので1000字まで
+      console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`);
     } catch (err) {
       console.error(`❌ 読み込み失敗: ${doc.url}`);
     }
