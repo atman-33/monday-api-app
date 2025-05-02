@@ -5,11 +5,13 @@
     "puppeteer": "^24.7.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^22.15.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "scripts": {
+    "biome:check:write": "npx biome check --write",
     "login": "ts-node src/index.ts --save-cookies",
     "scrape": "ts-node src/index.ts"
   }
