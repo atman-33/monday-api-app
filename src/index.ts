@@ -75,7 +75,7 @@ const saveCookies = async () => {
   console.log('🔐 ログインしてください。ログイン後、数秒待ってブラウザを閉じます...');
   await new Promise((resolve) => setTimeout(resolve, 20000)); // 20秒待機
 
-  const cookies = await page.cookies();
+  const cookies = await browser.cookies();
   fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
 
   console.log('✅ Cookieを保存しました。');
