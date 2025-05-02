@@ -12,6 +12,7 @@ const MONDAY_LOGIN_URL = process.env.MONDAY_LOGIN_URL || 'https://auth.monday.co
 const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
+const BOARD_ID = process.env.BOARD_ID;
 
 type Item = {
   id: string;
@@ -26,7 +27,7 @@ type Item = {
 
 const query = `
 query {
-  boards(ids: [9044506668]) {
+  boards(ids: [${BOARD_ID}]) {
     name
     items_page(limit: 100) {
       items {
