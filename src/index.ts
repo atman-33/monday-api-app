@@ -91,7 +91,7 @@ const readDocContents = async (docUrls: { itemName: string; docName: string; url
 
   // Cookieを読み込んでセット
   const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8'));
-  await page.setCookie(...cookies);
+  await browser.setCookie(...cookies);
 
   for (const doc of docUrls) {
     console.log(`\n📄 アイテム: ${doc.itemName}`);
@@ -109,6 +109,7 @@ const readDocContents = async (docUrls: { itemName: string; docName: string; url
       console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`);
     } catch (err) {
       console.error(`❌ 読み込み失敗: ${doc.url}`);
+      console.error(err);
     }
   }
 
