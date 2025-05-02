@@ -1,14 +1,15 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
+import dotenv from 'dotenv';
 import puppeteer from 'puppeteer';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
 
 dotenv.config();
 
-const MONDAY_LOGIN_URL = process.env.MONDAY_LOGIN_URL || 'https://auth.monday.com/auth/login_monday';
+const MONDAY_LOGIN_URL =
+  process.env.MONDAY_LOGIN_URL || 'https://auth.monday.com/auth/login_monday';
 const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
@@ -53,7 +54,7 @@ const fetchBoardItems = async (): Promise<Item[]> => {
         Authorization: API_TOKEN,
         'Content-Type': 'application/json',
       },
-    }
+    },
   );
 
   const board = response.data.data.boards[0];
@@ -73,7 +74,9 @@ const saveCookies = async () => {
   const page = await browser.newPage();
   await page.goto(MONDAY_LOGIN_URL, { waitUntil: 'networkidle2' });
 
-  console.log('🔐 ログインしてください。ログイン後、数秒待ってブラウザを閉じます...');
+  console.log(
+    '🔐 ログインしてください。ログイン後、数秒待ってブラウザを閉じます...',
+  );
   await new Promise((resolve) => setTimeout(resolve, 20000)); // 20秒待機
 
   const cookies = await browser.cookies();
@@ -83,7 +86,9 @@ const saveCookies = async () => {
   await browser.close();
 };
 
-const readDocContents = async (docUrls: { itemName: string; docName: string; url: string }[]) => {
+const readDocContents = async (
+  docUrls: { itemName: string; docName: string; url: string }[],
+) => {
   const browser = await puppeteer.launch({
     headless: false,
   });
@@ -105,7 +110,9 @@ const readDocContents = async (docUrls: { itemName: string; docName: string; url
       console.log('✅ 読み込み完了。内容を取得中...');
 
       const content = await page.evaluate(() => {
-        const container = document.querySelector('[data-testid="doc-container"]') || document.body;
+        const container =
+          document.querySelector('[data-testid="doc-container"]') ||
+          document.body;
         return (container as HTMLElement).innerText;
       });
 

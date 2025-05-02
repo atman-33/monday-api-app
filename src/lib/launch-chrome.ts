@@ -9,13 +9,13 @@ export const launchChrome = (): void => {
 
   const args = [
     '--remote-debugging-port=9222',
-    `--user-data-dir=${userDataDir}`
+    `--user-data-dir=${userDataDir}`,
   ];
 
   const chrome = spawn(chromePath, args, {
     shell: true,
     detached: true,
-    stdio: 'inherit'
+    stdio: 'inherit',
   });
 
   chrome.unref();
