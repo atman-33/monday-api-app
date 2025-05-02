@@ -66,7 +66,7 @@ const saveCookies = async () => {
   await waitForChrome();
   // PuppeteerでChromeに接続
   const browser = await puppeteer.connect({
-    browserURL: 'http://127.0.0.1:9222',
+    browserURL: 'http://localhost:9222',
   });
 
   const page = await browser.newPage();
