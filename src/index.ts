@@ -93,33 +93,34 @@ const readDocContents = async (
     headless: false,
   });
 
-  const page = await browser.newPage();
-
-  // Cookieを読み込んでセット
+  // Cookieを読み込み
   const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8'));
-  await browser.setCookie(...cookies);
 
   for (const doc of docUrls) {
     console.log(`\n📄 アイテム: ${doc.itemName}`);
     console.log(`🔗 Doc名: ${doc.docName}`);
     console.log(`🌐 URL: ${doc.url}`);
 
+    const page = await browser.newPage();
     try {
+      // Cookieをセット
+      await browser.setCookie(...cookies);
+
       console.log('🔄 読み込み中...');
       await page.goto(doc.url, { waitUntil: 'networkidle2' });
       console.log('✅ 読み込み完了。内容を取得中...');
 
       const content = await page.evaluate(() => {
-        const container =
-          document.querySelector('[data-testid="doc-container"]') ||
-          document.body;
-        return (container as HTMLElement).innerText;
+        const container = document.querySelector('.blocks-list');
+        return container ? (container as HTMLElement).innerText : '';
       });
 
       console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`);
     } catch (err) {
       console.error(`❌ 読み込み失敗: ${doc.url}`);
       console.error(err);
+    } finally {
+      await page.close();
     }
   }
 
@@ -144,13 +145,13 @@ const main = async () => {
         const parsed = JSON.parse(docColumn.value);
         const files = parsed.files || [];
 
-        files.forEach((file: any) => {
+        for (const file of files) {
           docLinks.push({
             itemName: item.name,
             docName: file.name,
             url: file.linkToFile,
           });
-        });
+        }
       } catch {
         console.warn(`⚠️ JSONパース失敗: ${item.name}`);
       }
