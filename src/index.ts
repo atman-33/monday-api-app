@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import fs from 'node:fs';
+import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
