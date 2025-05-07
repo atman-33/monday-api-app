@@ -36,6 +36,11 @@ query {
   }
 }`;
 
+/**
+ * ボードのアイテムを取得します。
+ *
+ * @returns {Promise<Item[]>} アイテムの配列
+ */
 const fetchBoardItems = async (): Promise<Item[]> => {
   const response = await axios.post(
     API_URL,
@@ -52,6 +57,9 @@ const fetchBoardItems = async (): Promise<Item[]> => {
   return board.items_page.items;
 };
 
+/**
+ * Cookieを保存します。
+ */
 const saveCookies = async () => {
   // Chromeをデバッグモードで起動
   launchChrome();
@@ -77,6 +85,11 @@ const saveCookies = async () => {
   await browser.close();
 };
 
+/**
+ * Docの内容を読み込みます。
+ *
+ * @param {Array<{ itemName: string; docName: string; url: string }>} docUrls DocのURL配列
+ */
 const readDocContents = async (
   docUrls: { itemName: string; docName: string; url: string }[],
 ) => {
@@ -118,6 +131,9 @@ const readDocContents = async (
   await browser.close();
 };
 
+/**
+ * メイン関数
+ */
 const main = async () => {
   const saveCookiesMode = process.argv.includes('--save-cookies');
 
