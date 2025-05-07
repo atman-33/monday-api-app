@@ -14,6 +14,7 @@ const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
 const BOARD_ID = process.env.BOARD_ID;
+const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
 
 type Item = {
   id: string;
@@ -139,7 +140,14 @@ const main = async () => {
   const docLinks: { itemName: string; docName: string; url: string }[] = [];
 
   for (const item of items) {
-    const docColumn = item.column_values.find((col) => col.type === 'doc');
+    // Docカラムを取得
+    // NOTE: MONDAY_DOC_COLUMN_IDが指定されている場合、そのカラムのみを対象とする
+    const docColumn = item.column_values.find(
+      (col) =>
+        col.type === 'doc' &&
+        (!MONDAY_DOC_COLUMN_ID || col.id === MONDAY_DOC_COLUMN_ID),
+    );
+
     if (docColumn?.value) {
       try {
         const parsed = JSON.parse(docColumn.value);
