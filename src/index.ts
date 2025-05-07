@@ -5,6 +5,7 @@ import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
+import type { Item, ParsedDocColumnValue } from './types';
 
 dotenv.config();
 
@@ -15,17 +16,6 @@ const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
 const BOARD_ID = process.env.BOARD_ID;
 const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
-
-type Item = {
-  id: string;
-  name: string;
-  column_values: Array<{
-    id: string;
-    type: string;
-    text?: string;
-    value?: string;
-  }>;
-};
 
 const query = `
 query {
@@ -150,7 +140,7 @@ const main = async () => {
 
     if (docColumn?.value) {
       try {
-        const parsed = JSON.parse(docColumn.value);
+        const parsed = JSON.parse(docColumn.value) as ParsedDocColumnValue;
         const files = parsed.files || [];
 
         for (const file of files) {
