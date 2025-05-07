@@ -16,12 +16,13 @@ const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
 const BOARD_ID = process.env.BOARD_ID;
 const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
+const ITEMS_PAGE_LIMIT = process.env.ITEMS_PAGE_LIMIT || 100;
 
 const query = `
 query {
   boards(ids: [${BOARD_ID}]) {
     name
-    items_page(limit: 100) {
+    items_page(limit: ${ITEMS_PAGE_LIMIT}) {
       items {
         id
         name
@@ -33,8 +34,7 @@ query {
       }
     }
   }
-}
-`;
+}`;
 
 const fetchBoardItems = async (): Promise<Item[]> => {
   const response = await axios.post(
