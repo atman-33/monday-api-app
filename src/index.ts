@@ -18,21 +18,27 @@ const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
 const BOARD_ID = process.env.BOARD_ID;
+const groupDataPath = path.resolve(__dirname, 'selected-group.json');
+const groupData = JSON.parse(fs.readFileSync(groupDataPath, 'utf-8'));
+const GROUP_ID = groupData.id;
 const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
 const ITEMS_PAGE_LIMIT = process.env.ITEMS_PAGE_LIMIT || 100;
 
 const query = `
 query {
   boards(ids: [${BOARD_ID}]) {
-    name
-    items_page(limit: ${ITEMS_PAGE_LIMIT}) {
-      items {
-        id
-        name
-        column_values {
+    groups(ids: ["${GROUP_ID}"]) {
+      id
+      title
+      items_page(limit: ${ITEMS_PAGE_LIMIT}) {
+        items{
           id
-          type
-          value
+          name
+          column_values{
+            id
+            type
+            value
+          }
         }
       }
     }
@@ -57,7 +63,7 @@ const fetchBoardItems = async (): Promise<Item[]> => {
   );
 
   const board = response.data.data.boards[0];
-  return board.items_page.items;
+  return board.groups[0].items_page.items;
 };
 
 /**
