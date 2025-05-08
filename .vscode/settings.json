@@ -16,5 +16,8 @@
   "editor.codeActionsOnSave": {
     "quickfix.biome": "always",
     "source.organizeImports.biome": "always"
+  },
+  "[csv]": {
+    "files.encoding": "shiftjis"
   }
 }

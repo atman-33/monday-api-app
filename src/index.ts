@@ -1,10 +1,13 @@
 import axios from 'axios';
+import { stringify } from 'csv-stringify/sync';
 import dotenv from 'dotenv';
+import Iconv from 'iconv-lite';
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
+import type { Item, ParsedDocColumnValue } from './types';
 
 dotenv.config();
 
@@ -14,23 +17,14 @@ const API_TOKEN = process.env.API_TOKEN || '';
 const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
 const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
 const BOARD_ID = process.env.BOARD_ID;
-
-type Item = {
-  id: string;
-  name: string;
-  column_values: Array<{
-    id: string;
-    type: string;
-    text?: string;
-    value?: string;
-  }>;
-};
+const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
+const ITEMS_PAGE_LIMIT = process.env.ITEMS_PAGE_LIMIT || 100;
 
 const query = `
 query {
   boards(ids: [${BOARD_ID}]) {
     name
-    items_page(limit: 100) {
+    items_page(limit: ${ITEMS_PAGE_LIMIT}) {
       items {
         id
         name
@@ -42,9 +36,13 @@ query {
       }
     }
   }
-}
-`;
+}`;
 
+/**
+ * ボードのアイテムを取得します。
+ *
+ * @returns {Promise<Item[]>} アイテムの配列
+ */
 const fetchBoardItems = async (): Promise<Item[]> => {
   const response = await axios.post(
     API_URL,
@@ -61,6 +59,9 @@ const fetchBoardItems = async (): Promise<Item[]> => {
   return board.items_page.items;
 };
 
+/**
+ * Cookieを保存します。
+ */
 const saveCookies = async () => {
   // Chromeをデバッグモードで起動
   launchChrome();
@@ -86,6 +87,11 @@ const saveCookies = async () => {
   await browser.close();
 };
 
+/**
+ * Docの内容を読み込みます。
+ *
+ * @param {Array<{ itemName: string; docName: string; url: string }>} docUrls DocのURL配列
+ */
 const readDocContents = async (
   docUrls: { itemName: string; docName: string; url: string }[],
 ) => {
@@ -96,6 +102,8 @@ const readDocContents = async (
   // Cookieを読み込み
   const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8'));
 
+  const dataArray = [];
+  let id = 1;
   for (const doc of docUrls) {
     console.log(`\n📄 アイテム: ${doc.itemName}`);
     console.log(`🔗 Doc名: ${doc.docName}`);
@@ -116,6 +124,17 @@ const readDocContents = async (
       });
 
       console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`);
+
+      // CSVデータを作成
+      const data = {
+        id: id++,
+        itemName: doc.itemName,
+        docName: doc.docName,
+        url: doc.url,
+        content: content,
+      };
+
+      dataArray.push(data);
     } catch (err) {
       console.error(`❌ 読み込み失敗: ${doc.url}`);
       console.error(err);
@@ -124,9 +143,20 @@ const readDocContents = async (
     }
   }
 
+  const csvString = stringify(dataArray, {
+    header: true,
+    quoted_string: true,
+  });
+
+  const csvStringSjis = Iconv.encode(csvString, 'Shift_JIS');
+  fs.writeFileSync('output.csv', csvStringSjis);
+
   await browser.close();
 };
 
+/**
+ * メイン関数
+ */
 const main = async () => {
   const saveCookiesMode = process.argv.includes('--save-cookies');
 
@@ -139,10 +169,17 @@ const main = async () => {
   const docLinks: { itemName: string; docName: string; url: string }[] = [];
 
   for (const item of items) {
-    const docColumn = item.column_values.find((col) => col.type === 'doc');
+    // Docカラムを取得
+    // NOTE: MONDAY_DOC_COLUMN_IDが指定されている場合、そのカラムのみを対象とする
+    const docColumn = item.column_values.find(
+      (col) =>
+        col.type === 'doc' &&
+        (!MONDAY_DOC_COLUMN_ID || col.id === MONDAY_DOC_COLUMN_ID),
+    );
+
     if (docColumn?.value) {
       try {
-        const parsed = JSON.parse(docColumn.value);
+        const parsed = JSON.parse(docColumn.value) as ParsedDocColumnValue;
         const files = parsed.files || [];
 
         for (const file of files) {
