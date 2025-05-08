@@ -1,54 +1,23 @@
 import axios from 'axios';
 import { stringify } from 'csv-stringify/sync';
-import dotenv from 'dotenv';
 import Iconv from 'iconv-lite';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import puppeteer from 'puppeteer';
+import { env } from './config';
+import { getGroupId } from './lib/get-group-id';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
 import type { Item, ParsedDocColumnValue } from './types';
 
-dotenv.config();
-
-const MONDAY_LOGIN_URL =
-  process.env.MONDAY_LOGIN_URL || 'https://auth.monday.com/auth/login_monday';
-const API_TOKEN = process.env.API_TOKEN || '';
-const API_URL = process.env.API_URL || 'https://api.monday.com/v2';
-const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
-const BOARD_ID = process.env.BOARD_ID;
-const groupDataPath = path.resolve(__dirname, 'selected-group.json');
-let groupData: { id: string };
-
-try {
-  groupData = JSON.parse(fs.readFileSync(groupDataPath, 'utf-8'));
-} catch (err) {
-  if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-    console.error(
-      `❌ エラー: ${groupDataPath} が見つかりません！グループを選択して保存してください。\n👉 コマンドを実行してグループを選択: npm run select-group`,
-    );
-    process.exit(1);
-  } else {
-    console.error(
-      `❌ エラー: ${groupDataPath} の読み込み中に問題が発生しました。`,
-    );
-    console.error(err);
-    process.exit(1);
-  }
-}
-
-const GROUP_ID = groupData.id;
-const MONDAY_DOC_COLUMN_ID = process.env.MONDAY_DOC_COLUMN_ID || '';
-const ITEMS_PAGE_LIMIT = process.env.ITEMS_PAGE_LIMIT || 100;
-
-const query = `
+const createQuery = (boardId: string, groupId: string) => `
 query {
-  boards(ids: [${BOARD_ID}]) {
-    groups(ids: ["${GROUP_ID}"]) {
+  boards(ids: [${boardId}]) {
+    groups(ids: ["${groupId}"]) {
       id
       title
-      items_page(limit: ${ITEMS_PAGE_LIMIT}) {
+      items_page(limit: ${env.ITEMS_PAGE_LIMIT}) {
         items{
           id
           name
@@ -70,11 +39,11 @@ query {
  */
 const fetchBoardItems = async (): Promise<Item[]> => {
   const response = await axios.post(
-    API_URL,
-    { query },
+    env.API_URL,
+    { query: createQuery(env.BOARD_ID, getGroupId()) },
     {
       headers: {
-        Authorization: API_TOKEN,
+        Authorization: env.API_TOKEN,
         'Content-Type': 'application/json',
       },
     },
@@ -98,7 +67,7 @@ const saveCookies = async () => {
   });
 
   const page = await browser.newPage();
-  await page.goto(MONDAY_LOGIN_URL, { waitUntil: 'networkidle2' });
+  await page.goto(env.MONDAY_LOGIN_URL, { waitUntil: 'networkidle2' });
 
   console.log(
     '🔐 ログインしてください。ログイン後、数秒待ってブラウザを閉じます...',
@@ -106,7 +75,7 @@ const saveCookies = async () => {
   await new Promise((resolve) => setTimeout(resolve, 20000)); // 20秒待機
 
   const cookies = await browser.cookies();
-  fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
+  fs.writeFileSync(env.COOKIES_PATH, JSON.stringify(cookies, null, 2));
 
   console.log('✅ Cookieを保存しました。');
   await browser.close();
@@ -125,7 +94,7 @@ const readDocContents = async (
   });
 
   // Cookieを読み込み
-  const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8'));
+  const cookies = JSON.parse(fs.readFileSync(env.COOKIES_PATH, 'utf-8'));
 
   const dataArray = [];
   let id = 1;
@@ -185,7 +154,7 @@ const readDocContents = async (
 const selectGroup = async () => {
   const groupQuery = `
   query {
-    boards(ids: [${BOARD_ID}]) {
+    boards(ids: [${env.BOARD_ID}]) {
       groups {
         id
         title
@@ -194,11 +163,11 @@ const selectGroup = async () => {
   }`;
 
   const response = await axios.post(
-    API_URL,
+    env.API_URL,
     { query: groupQuery },
     {
       headers: {
-        Authorization: API_TOKEN,
+        Authorization: env.API_TOKEN,
         'Content-Type': 'application/json',
       },
     },
@@ -269,7 +238,7 @@ const main = async () => {
     const docColumn = item.column_values.find(
       (col) =>
         col.type === 'doc' &&
-        (!MONDAY_DOC_COLUMN_ID || col.id === MONDAY_DOC_COLUMN_ID),
+        (!env.MONDAY_DOC_COLUMN_ID || col.id === env.MONDAY_DOC_COLUMN_ID),
     );
 
     if (docColumn?.value) {
