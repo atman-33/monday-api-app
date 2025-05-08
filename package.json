@@ -15,6 +15,7 @@
   "scripts": {
     "biome:check:write": "npx biome check --write",
     "login": "ts-node src/index.ts --save-cookies",
+    "select-group": "ts-node src/index.ts --select-group",
     "scrape": "ts-node src/index.ts"
   }
 }

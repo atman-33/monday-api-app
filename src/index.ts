@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import Iconv from 'iconv-lite';
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline';
 import puppeteer from 'puppeteer';
 import { launchChrome } from './lib/launch-chrome';
 import { waitForChrome } from './lib/wait-for-chrome';
@@ -155,6 +156,71 @@ const readDocContents = async (
 };
 
 /**
+ * グループを選択して保存します。
+ */
+const selectGroup = async () => {
+  const groupQuery = `
+  query {
+    boards(ids: [${BOARD_ID}]) {
+      groups {
+        id
+        title
+      }
+    }
+  }`;
+
+  const response = await axios.post(
+    API_URL,
+    { query: groupQuery },
+    {
+      headers: {
+        Authorization: API_TOKEN,
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+
+  const groups = response.data.data.boards[0].groups as Array<{
+    id: string;
+    title: string;
+  }>;
+  console.log('📋 グループ一覧:');
+  groups.forEach((group, index) => {
+    console.log(`${index + 1}: ${group.title} (ID: ${group.id})`);
+  });
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const selectedGroupIndex = await new Promise<number>((resolve) => {
+    rl.question('選択するグループの番号を入力してください: ', (answer) => {
+      resolve(Number.parseInt(answer, 10) - 1);
+    });
+  });
+
+  rl.close();
+
+  if (
+    selectedGroupIndex < 0 ||
+    selectedGroupIndex >= groups.length ||
+    Number.isNaN(selectedGroupIndex)
+  ) {
+    console.error('❌ 無効な選択です。');
+    return;
+  }
+
+  const selectedGroup = groups[selectedGroupIndex];
+  const groupDataPath = path.resolve(__dirname, 'selected-group.json');
+  fs.writeFileSync(groupDataPath, JSON.stringify(selectedGroup, null, 2));
+
+  console.log(
+    `✅ 選択したグループを保存しました: ${selectedGroup.title} (ID: ${selectedGroup.id})`,
+  );
+};
+
+/**
  * メイン関数
  */
 const main = async () => {
@@ -162,6 +228,11 @@ const main = async () => {
 
   if (saveCookiesMode) {
     await saveCookies();
+    return;
+  }
+
+  if (process.argv.includes('--select-group')) {
+    await selectGroup();
     return;
   }
 
