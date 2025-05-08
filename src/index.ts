@@ -1,5 +1,7 @@
 import axios from 'axios';
+import { stringify } from 'csv-stringify/sync';
 import dotenv from 'dotenv';
+import Iconv from 'iconv-lite';
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
@@ -100,6 +102,8 @@ const readDocContents = async (
   // Cookieを読み込み
   const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8'));
 
+  const dataArray = [];
+  let id = 1;
   for (const doc of docUrls) {
     console.log(`\n📄 アイテム: ${doc.itemName}`);
     console.log(`🔗 Doc名: ${doc.docName}`);
@@ -120,6 +124,17 @@ const readDocContents = async (
       });
 
       console.log(`📝 内容:\n${content.slice(0, 1000)}\n...`);
+
+      // CSVデータを作成
+      const data = {
+        id: id++,
+        itemName: doc.itemName,
+        docName: doc.docName,
+        url: doc.url,
+        content: content,
+      };
+
+      dataArray.push(data);
     } catch (err) {
       console.error(`❌ 読み込み失敗: ${doc.url}`);
       console.error(err);
@@ -127,6 +142,14 @@ const readDocContents = async (
       await page.close();
     }
   }
+
+  const csvString = stringify(dataArray, {
+    header: true,
+    quoted_string: true,
+  });
+
+  const csvStringSjis = Iconv.encode(csvString, 'Shift_JIS');
+  fs.writeFileSync('output.csv', csvStringSjis);
 
   await browser.close();
 };

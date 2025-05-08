@@ -9,3 +9,6 @@ src/cookies.json
 
 # dist
 dist/
+
+# output
+output.csv
