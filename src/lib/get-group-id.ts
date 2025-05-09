@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { env } from '@/config';
+import { env } from '../config';
 
 const getGroupId = (): string => {
   const groupDataPath = env.GROUP_ID_PATH;

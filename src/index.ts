@@ -1,6 +1,6 @@
-import { getContentsAndSaveCsv } from '@/modules/commands/get-contents-and-save-csv';
-import { saveCookies } from '@/modules/commands/save-cookies';
-import { selectGroup } from '@/modules/commands/select-group';
+import { getContentsAndSaveCsv } from './modules/commands/get-contents-and-save-csv';
+import { saveCookies } from './modules/commands/save-cookies';
+import { selectGroup } from './modules/commands/select-group';
 
 /**
  * メイン関数

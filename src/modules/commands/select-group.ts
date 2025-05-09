@@ -1,7 +1,7 @@
+import axios from 'axios';
 import fs from 'node:fs';
 import readline from 'node:readline';
-import { env } from '@/config';
-import axios from 'axios';
+import { env } from '../../config';
 
 /**
  * グループを選択して保存します。
