@@ -5,7 +5,10 @@ node_modules/
 .env
 
 # cookie
-src/cookies.json
+cookies.json
+
+# selected group
+selected-group.json
 
 # dist
 dist/

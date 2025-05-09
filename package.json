@@ -13,8 +13,14 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "biome:check:write": "npx biome check --write",
+    "--- COMMANDS SECTION ---": "--- --- --- --- ---",
     "login": "ts-node src/index.ts --save-cookies",
-    "scrape": "ts-node src/index.ts"
+    "select-group": "ts-node src/index.ts --select-group",
+    "scrape": "ts-node src/index.ts",
+    "--- CHECKS SECTION ---": "--- --- --- --- ---",
+    "biome:check:write": "npx biome check --write",
+    "--- CI SECTION ---": "--- --- --- --- ---",
+    "ci:check": "npx biome ci",
+    "ci:build": "npx env-cmd -f .env.example npx tsc --build"
   }
 }
