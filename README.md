@@ -46,35 +46,31 @@ npm run login
 
 This will launch a Chrome browser in debug mode. Log in to your monday.com account. After logging in, wait a few seconds and close the browser. The cookies will be saved to `cookies.json`.
 
-### 2. Scrape Doc Contents
+### 2. Select Group
 
-After saving the cookies, you can scrape the content from the monday Doc columns and export it to a CSV file. Run the following command:
+To select a specific group, run the following command:
+
+```bash
+npm run select-group
+```
+
+This will launch a Chrome browser in debug mode. Select the group you want to scrape and close the browser. The selected group will be saved to `group.json`.
+
+### 3. Scrape Doc Contents
+
+After saving the cookies and selecting a group, you can scrape the content from the monday Doc columns and export it to a CSV file. Run the following command:
 
 ```bash
 npm run scrape
 ```
 
-This will scrape the content from all monday Doc columns on the specified board and save it to `output.csv`. The CSV file will be encoded in Shift_JIS.
+This will scrape the content from the monday Doc columns on the specified board (for the selected group, if any) and save it to `output.csv`. The CSV file will be encoded in Shift_JIS.
 
 ## Scripts
 
 The `package.json` file contains the following scripts:
 
--   `biome:check:write`: Runs Biome to check and format the code.
--   `login`: Logs in to monday.com and saves the cookies.
+-   `login`: Logs in to monday.com and saves the cookies for authentication.
+-   `select-group`: Selects a specific group to scrape.
 -   `scrape`: Scrapes the content from monday Doc columns and exports it to a CSV file.
-
-## Dependencies
-
--   `axios`: For making HTTP requests to the monday.com API.
--   `csv-stringify`: For converting data to CSV format.
--   `dotenv`: For loading environment variables from a `.env` file.
--   `iconv-lite`: For encoding the CSV file to Shift_JIS.
--   `puppeteer`: For automating Chrome to log in and scrape the Doc contents.
-
-## Dev Dependencies
-
--   `@biomejs/biome`: For code formatting and linting.
--   `@types/node`: For TypeScript type definitions for Node.js.
--   `ts-node`: For running TypeScript files directly.
--   `typescript`: For TypeScript compilation.
+-   `biome:check:write`: Runs Biome to check and format the code.
