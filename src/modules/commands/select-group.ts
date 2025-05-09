@@ -1,6 +1,6 @@
-import axios from 'axios';
 import fs from 'node:fs';
 import readline from 'node:readline';
+import axios from 'axios';
 import { env } from '../../config';
 
 /**
