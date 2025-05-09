@@ -1,8 +1,8 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { env } from '../config';
 
 const getGroupId = (): string => {
-  const groupDataPath = path.resolve(__dirname, '../selected-group.json');
+  const groupDataPath = env.GROUP_ID_PATH;
 
   let groupData: { id: string };
 

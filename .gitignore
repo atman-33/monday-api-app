@@ -8,7 +8,7 @@ node_modules/
 cookies.json
 
 # selected group
-src/selected-group.json
+selected-group.json
 
 # dist
 dist/

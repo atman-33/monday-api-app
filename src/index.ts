@@ -2,12 +2,11 @@ import axios from 'axios';
 import { stringify } from 'csv-stringify/sync';
 import Iconv from 'iconv-lite';
 import fs from 'node:fs';
-import path from 'node:path';
-import readline from 'node:readline';
 import puppeteer from 'puppeteer';
 import { env } from './config';
 import { getGroupId } from './lib/get-group-id';
 import { saveCookies } from './modules/commands/save-cookies';
+import { selectGroup } from './modules/commands/select-group';
 import type { Item, ParsedDocColumnValue } from './types';
 
 const createQuery = (boardId: string, groupId: string) => `
@@ -117,71 +116,6 @@ const readDocContents = async (
   fs.writeFileSync('output.csv', csvStringSjis);
 
   await browser.close();
-};
-
-/**
- * グループを選択して保存します。
- */
-const selectGroup = async () => {
-  const groupQuery = `
-  query {
-    boards(ids: [${env.BOARD_ID}]) {
-      groups {
-        id
-        title
-      }
-    }
-  }`;
-
-  const response = await axios.post(
-    env.API_URL,
-    { query: groupQuery },
-    {
-      headers: {
-        Authorization: env.API_TOKEN,
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-
-  const groups = response.data.data.boards[0].groups as Array<{
-    id: string;
-    title: string;
-  }>;
-  console.log('📋 グループ一覧:');
-  groups.forEach((group, index) => {
-    console.log(`${index + 1}: ${group.title} (ID: ${group.id})`);
-  });
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const selectedGroupIndex = await new Promise<number>((resolve) => {
-    rl.question('選択するグループの番号を入力してください: ', (answer) => {
-      resolve(Number.parseInt(answer, 10) - 1);
-    });
-  });
-
-  rl.close();
-
-  if (
-    selectedGroupIndex < 0 ||
-    selectedGroupIndex >= groups.length ||
-    Number.isNaN(selectedGroupIndex)
-  ) {
-    console.error('❌ 無効な選択です。');
-    return;
-  }
-
-  const selectedGroup = groups[selectedGroupIndex];
-  const groupDataPath = path.resolve(__dirname, 'selected-group.json');
-  fs.writeFileSync(groupDataPath, JSON.stringify(selectedGroup, null, 2));
-
-  console.log(
-    `✅ 選択したグループを保存しました: ${selectedGroup.title} (ID: ${selectedGroup.id})`,
-  );
 };
 
 /**
