@@ -5,7 +5,7 @@ node_modules/
 .env
 
 # cookie
-src/cookies.json
+cookies.json
 
 # selected group
 src/selected-group.json

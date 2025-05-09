@@ -7,8 +7,7 @@ import readline from 'node:readline';
 import puppeteer from 'puppeteer';
 import { env } from './config';
 import { getGroupId } from './lib/get-group-id';
-import { launchChrome } from './lib/launch-chrome';
-import { waitForChrome } from './lib/wait-for-chrome';
+import { saveCookies } from './modules/commands/save-cookies';
 import type { Item, ParsedDocColumnValue } from './types';
 
 const createQuery = (boardId: string, groupId: string) => `
@@ -51,34 +50,6 @@ const fetchBoardItems = async (): Promise<Item[]> => {
 
   const board = response.data.data.boards[0];
   return board.groups[0].items_page.items;
-};
-
-/**
- * Cookieを保存します。
- */
-const saveCookies = async () => {
-  // Chromeをデバッグモードで起動
-  launchChrome();
-  // Chromeが起動するまで待機
-  await waitForChrome();
-  // PuppeteerでChromeに接続
-  const browser = await puppeteer.connect({
-    browserURL: 'http://localhost:9222',
-  });
-
-  const page = await browser.newPage();
-  await page.goto(env.MONDAY_LOGIN_URL, { waitUntil: 'networkidle2' });
-
-  console.log(
-    '🔐 ログインしてください。ログイン後、数秒待ってブラウザを閉じます...',
-  );
-  await new Promise((resolve) => setTimeout(resolve, 20000)); // 20秒待機
-
-  const cookies = await browser.cookies();
-  fs.writeFileSync(env.COOKIES_PATH, JSON.stringify(cookies, null, 2));
-
-  console.log('✅ Cookieを保存しました。');
-  await browser.close();
 };
 
 /**
@@ -217,9 +188,7 @@ const selectGroup = async () => {
  * メイン関数
  */
 const main = async () => {
-  const saveCookiesMode = process.argv.includes('--save-cookies');
-
-  if (saveCookiesMode) {
+  if (process.argv.includes('--save-cookies')) {
     await saveCookies();
     return;
   }
