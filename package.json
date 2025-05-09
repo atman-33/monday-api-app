@@ -18,6 +18,9 @@
     "select-group": "ts-node src/index.ts --select-group",
     "scrape": "ts-node src/index.ts",
     "--- CHECKS SECTION ---": "--- --- --- --- ---",
-    "biome:check:write": "npx biome check --write"
+    "biome:check:write": "npx biome check --write",
+    "--- CI SECTION ---": "--- --- --- --- ---",
+    "ci:check": "npx biome ci",
+    "ci:build": "npx env-cmd -f .env.example npx tsc --build"
   }
 }
