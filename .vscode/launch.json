@@ -6,10 +6,7 @@
       "request": "launch",
       "name": "Debug Scrape Script",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "scrape"
-      ],
+      "runtimeArgs": ["run", "scrape"],
       "preLaunchTask": "Compile TypeScript",
       "cwd": "${workspaceFolder}",
       "program": "${file}"

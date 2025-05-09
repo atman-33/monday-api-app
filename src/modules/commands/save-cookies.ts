@@ -1,7 +1,7 @@
+import fs from 'node:fs';
 import { env } from '@/config';
 import { launchChrome } from '@/lib/launch-chrome';
 import { waitForChrome } from '@/lib/wait-for-chrome';
-import fs from 'node:fs';
 import puppeteer from 'puppeteer';
 
 /**

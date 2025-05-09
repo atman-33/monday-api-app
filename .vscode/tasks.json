@@ -5,9 +5,7 @@
       "label": "Compile TypeScript",
       "type": "typescript",
       "tsconfig": "tsconfig.json",
-      "problemMatcher": [
-        "$tsc"
-      ]
+      "problemMatcher": ["$tsc"]
     }
   ]
 }

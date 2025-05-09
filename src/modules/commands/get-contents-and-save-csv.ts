@@ -1,10 +1,10 @@
+import fs from 'node:fs';
 import { env } from '@/config';
 import { getGroupId } from '@/lib/get-group-id';
 import type { Item, ParsedDocColumnValue } from '@/types';
 import axios from 'axios';
 import { stringify } from 'csv-stringify/sync';
 import Iconv from 'iconv-lite';
-import fs from 'node:fs';
 import puppeteer from 'puppeteer';
 
 export const getContentsAndSaveCsv = async () => {

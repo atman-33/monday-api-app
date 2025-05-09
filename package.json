@@ -13,9 +13,11 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "biome:check:write": "npx biome check --write",
+    "--- COMMANDS SECTION ---": "--- --- --- --- ---",
     "login": "ts-node src/index.ts --save-cookies",
     "select-group": "ts-node src/index.ts --select-group",
-    "scrape": "ts-node src/index.ts"
+    "scrape": "ts-node src/index.ts",
+    "--- CHECKS SECTION ---": "--- --- --- --- ---",
+    "biome:check:write": "npx biome check --write"
   }
 }
